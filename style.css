@@ -51,3 +51,9 @@ button {
   border: none;
   cursor: pointer;
 }
+.me {
+  background: #0084ff;
+  color: white;
+  margin-left: auto;
+  text-align: right;
+}
