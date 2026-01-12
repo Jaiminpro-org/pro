@@ -3,6 +3,12 @@ const input = document.getElementById("messageInput");
 const button = document.getElementById("sendBtn");
 
 button.addEventListener("click", sendMessage);
+input.addEventListener("keydown", function (e) {
+  if (e.key === "Enter") {
+    sendMessage();
+  }
+});
+
 
 function sendMessage() {
   const text = input.value.trim();
