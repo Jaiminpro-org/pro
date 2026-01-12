@@ -57,3 +57,34 @@ header {
 .input button {
   padding: 8px 12px;
 }
+.chat {
+  display: flex;
+  flex-direction: column;
+}
+
+.message {
+  max-width: 75%;
+  padding: 8px 10px;
+  margin-bottom: 6px;
+  border-radius: 10px;
+  word-wrap: break-word;
+}
+
+.message.me {
+  align-self: flex-end;
+  background: #0084ff;
+  color: white;
+}
+
+.message.other {
+  align-self: flex-start;
+  background: #e4e6eb;
+  color: black;
+}
+
+.username {
+  font-size: 11px;
+  opacity: 0.7;
+  margin-bottom: 2px;
+}
+

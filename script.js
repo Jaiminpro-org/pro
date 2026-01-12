@@ -1,39 +1,42 @@
-function send() {
-  const text = document.getElementById("text");
-  if (text.value.trim() === "") return;
+const username = prompt("Enter your username") || "You";
 
-  const msg = document.createElement("div");
-  msg.className = "msg me";
-  msg.innerText = text.value;
-
-  document.getElementById("messages").appendChild(msg);
-  text.value = "";
-}
 const input = document.getElementById("messageInput");
 const button = document.getElementById("sendBtn");
 const chat = document.getElementById("chat");
+
+function addMessage(text, sender, type) {
+  const msg = document.createElement("div");
+  msg.className = "message " + type;
+
+  const name = document.createElement("div");
+  name.className = "username";
+  name.innerText = sender;
+
+  const content = document.createElement("div");
+  content.innerText = text;
+
+  msg.appendChild(name);
+  msg.appendChild(content);
+  chat.appendChild(msg);
+
+  chat.scrollTop = chat.scrollHeight;
+}
 
 function sendMessage() {
   const text = input.value.trim();
   if (text === "") return;
 
-  const msg = document.createElement("div");
-  msg.className = "message";
-  msg.innerText = text;
-
-  chat.appendChild(msg);
-
-  // clear input
+  addMessage(text, username, "me");
   input.value = "";
 
-  // auto scroll
-  chat.scrollTop = chat.scrollHeight;
+  // demo reply
+  setTimeout(() => {
+    addMessage("Got it 👍", "Friend", "other");
+  }, 600);
 }
 
-// click send button
 button.addEventListener("click", sendMessage);
 
-// press Enter key
 input.addEventListener("keydown", function (e) {
   if (e.key === "Enter") {
     sendMessage();
