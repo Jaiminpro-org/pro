@@ -1,3 +1,5 @@
+console.log("JS loaded");
+
 const chat = document.getElementById("chat");
 const input = document.getElementById("messageInput");
 const button = document.getElementById("sendBtn");
