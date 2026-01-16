@@ -4,13 +4,26 @@ const chat = document.getElementById("chat");
 const input = document.getElementById("messageInput");
 const button = document.getElementById("sendBtn");
 
+let username = localStorage.getItem("username");
+
+if (!username) {
+  username = prompt("Enter your name:");
+  localStorage.setItem("username", username);
+}
+
+
 function sendMessage() {
   const text = input.value.trim();
   if (text === "") return;
 
   const msg = document.createElement("div");
   msg.classList.add("message", "me");
-  msg.innerText = text;
+  const name = document.createElement("div");
+name.className = "username";
+name.innerText = username;
+
+msg.appendChild(name);
+msg.append(text);
 
   chat.appendChild(msg);
   input.value = "";
