@@ -36,7 +36,13 @@ button.addEventListener("click", sendMessage);
 
 input.addEventListener("keydown", function (e) {
   if (e.key === "Enter") {
-    sendMessage();
+    sendMessage()
+    const time = document.createElement("div");
+time.className = "time";
+time.innerText = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+msg.appendChild(time);
+;
   }
 });
 function fakeReply() {
@@ -46,7 +52,13 @@ function fakeReply() {
     "Nice!",
     "Tell me more 👀",
     "Haha 😄"
-  ];
+  ]
+  const time = document.createElement("div");
+time.className = "time";
+time.innerText = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+msg.appendChild(time);
+;
 
   const msg = document.createElement("div");
   msg.classList.add("message", "other");

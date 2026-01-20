@@ -82,3 +82,14 @@ button {
   color: #555;
   margin-bottom: 2px;
 }
+.time {
+  font-size: 10px;
+  color: #ddd;
+  margin-top: 3px;
+  text-align: right;
+}
+
+.other .time {
+  color: #555;
+  text-align: left;
+}
