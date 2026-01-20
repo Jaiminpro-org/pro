@@ -44,15 +44,11 @@ button.addEventListener("click", sendMessage);
 
 input.addEventListener("keydown", function (e) {
   if (e.key === "Enter") {
-    sendMessage()
-    const time = document.createElement("div");
-time.className = "time";
-time.innerText = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-
-msg.appendChild(time);
-;
+    sendMessage();
   }
 });
+
+
 function fakeReply() {
   const replies = [
     "Hi 🙂",
@@ -66,14 +62,7 @@ function fakeReply() {
   msg.classList.add("message", "other");
   msg.innerText = replies[Math.floor(Math.random() * replies.length)];
 
-  const time = document.createElement("div");
-  time.className = "time";
-  time.innerText = new Date().toLocaleTimeString([], {
-    hour: "2-digit",
-    minute: "2-digit"
-  });
-
-  msg.appendChild(time);
+ 
   chat.appendChild(msg);
   chat.scrollTop = chat.scrollHeight;
 }
