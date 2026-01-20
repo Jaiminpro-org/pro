@@ -24,6 +24,13 @@ name.innerText = username;
 
 msg.appendChild(name);
 msg.append(text);
+const time = document.createElement("div");
+time.className = "time";
+time.innerText = new Date().toLocaleTimeString([], {
+  hour: "2-digit",
+  minute: "2-digit"
+});
+msg.appendChild(time);
 
   chat.appendChild(msg);
   input.value = "";
@@ -46,19 +53,21 @@ msg.appendChild(time);
   }
 });
 function fakeReply() {
+  const time = document.createElement("div");
+time.className = "time";
+time.innerText = new Date().toLocaleTimeString([], {
+  hour: "2-digit",
+  minute: "2-digit"
+});
+msg.appendChild(time);
+
   const replies = [
     "Hi 🙂",
     "Okay 👍",
     "Nice!",
     "Tell me more 👀",
     "Haha 😄"
-  ]
-  const time = document.createElement("div");
-time.className = "time";
-time.innerText = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-
-msg.appendChild(time);
-;
+  ];
 
   const msg = document.createElement("div");
   msg.classList.add("message", "other");
