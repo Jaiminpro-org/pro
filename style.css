@@ -93,3 +93,6 @@ button {
   color: #555;
   text-align: left;
 }
+#clearBtn {
+  background: #ff4d4d;
+}

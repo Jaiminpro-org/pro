@@ -3,6 +3,7 @@ console.log("JS loaded");
 const chat = document.getElementById("chat");
 const input = document.getElementById("messageInput");
 const button = document.getElementById("sendBtn");
+const clearBtn = document.getElementById("clearBtn");
 
 let username = localStorage.getItem("username");
 
@@ -76,3 +77,7 @@ function fakeReply() {
   chat.appendChild(msg);
   chat.scrollTop = chat.scrollHeight;
 }
+clearBtn.addEventListener("click", function () {
+  chat.innerHTML = "";
+});
+
