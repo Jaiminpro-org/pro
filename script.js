@@ -4,6 +4,8 @@ const chat = document.getElementById("chat");
 const input = document.getElementById("messageInput");
 const button = document.getElementById("sendBtn");
 const clearBtn = document.getElementById("clearBtn");
+const changeNameBtn = document.getElementById("changeNameBtn");
+
 
 let username = localStorage.getItem("username");
 
@@ -68,5 +70,9 @@ function fakeReply() {
 }
 clearBtn.addEventListener("click", function () {
   chat.innerHTML = "";
+});
+changeNameBtn.addEventListener("click", function () {
+  localStorage.removeItem("username");
+  location.reload();
 });
 

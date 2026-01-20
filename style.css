@@ -96,3 +96,7 @@ button {
 #clearBtn {
   background: #ff4d4d;
 }
+#changeNameBtn {
+  background: #555;
+  margin-top: 6px;
+}
