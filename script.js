@@ -53,12 +53,7 @@ msg.appendChild(time);
   }
 });
 function fakeReply() {
-  const time = document.createElement("div");
-time.className = "time";
-time.innerText = new Date().toLocaleTimeString([], {
-  hour: "2-digit",
-  minute: "2-digit"
-});
+ 
 msg.appendChild(time);
 
   const replies = [
@@ -75,4 +70,10 @@ msg.appendChild(time);
 
   chat.appendChild(msg);
   chat.scrollTop = chat.scrollHeight;
+   const time = document.createElement("div");
+time.className = "time";
+time.innerText = new Date().toLocaleTimeString([], {
+  hour: "2-digit",
+  minute: "2-digit"
+});
 }
