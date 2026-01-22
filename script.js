@@ -1,4 +1,4 @@
-// Firebase config
+// 🔥 Firebase config (PASTE YOUR REAL VALUES)
 const firebaseConfig = {
   apiKey: "PASTE_HERE",
   authDomain: "PASTE_HERE",
@@ -12,100 +12,69 @@ const firebaseConfig = {
 // Initialize Firebase
 firebase.initializeApp(firebaseConfig);
 
-// Database reference
+// Database
 const db = firebase.database();
 const messagesRef = db.ref("messages");
 
 console.log("JS loaded");
 
-
+// Elements
 const chat = document.getElementById("chat");
 const input = document.getElementById("messageInput");
 const button = document.getElementById("sendBtn");
 const clearBtn = document.getElementById("clearBtn");
 const changeNameBtn = document.getElementById("changeNameBtn");
 
-
+// Username
 let username = localStorage.getItem("username");
-
 if (!username) {
   username = prompt("Enter your name:");
   localStorage.setItem("username", username);
 }
 
+// ✅ SEND MESSAGE (ONLY PUSH TO FIREBASE)
+function sendMessage(e) {
+  if (e) e.preventDefault();
 
-function sendMessage() {
   const text = input.value.trim();
   if (text === "") return;
 
-  const msg = document.createElement("div");
-  msg.classList.add("message", "me");
-  const name = document.createElement("div");
-name.className = "username";
-name.innerText = username;
+  messagesRef.push({
+    name: username,
+    text: text,
+    time: Date.now()
+  });
 
-msg.appendChild(name);
-msg.append(text);
-const time = document.createElement("div");
-time.className = "time";
-time.innerText = new Date().toLocaleTimeString([], {
-  hour: "2-digit",
-  minute: "2-digit"
-});
-msg.appendChild(time);
-
-  chat.appendChild(msg);
   input.value = "";
-  chat.scrollTop = chat.scrollHeight;
-  setTimeout(fakeReply, 800);
-messagesRef.push({
-  name: username,
-  text: text,
-  time: Date.now()
-});
-
 }
 
+// Button click
 button.addEventListener("click", sendMessage);
 
+// Enter key
 input.addEventListener("keydown", function (e) {
   if (e.key === "Enter") {
-    sendMessage();
+    sendMessage(e);
   }
 });
 
-
-function fakeReply() {
-  const replies = [
-    "Hi 🙂",
-    "Okay 👍",
-    "Nice!",
-    "Tell me more 👀",
-    "Haha 😄"
-  ];
-
-  const msg = document.createElement("div");
-  msg.classList.add("message", "other");
-  msg.innerText = replies[Math.floor(Math.random() * replies.length)];
-
- 
-  chat.appendChild(msg);
-  chat.scrollTop = chat.scrollHeight;
-}
+// Clear chat (local only)
 clearBtn.addEventListener("click", function () {
   chat.innerHTML = "";
 });
+
+// Change name
 changeNameBtn.addEventListener("click", function () {
   localStorage.removeItem("username");
   location.reload();
 });
+
+// ✅ REALTIME LISTENER (UI IS BUILT HERE ONLY)
 messagesRef.on("child_added", function (snapshot) {
   const data = snapshot.val();
 
   const msg = document.createElement("div");
-  msg.classList.add("message");
-
-  msg.classList.add(data.name === username ? "me" : "other");
+  msg.classList.add("message", data.name === username ? "me" : "other");
 
   const name = document.createElement("div");
   name.className = "username";
@@ -128,4 +97,3 @@ messagesRef.on("child_added", function (snapshot) {
   chat.appendChild(msg);
   chat.scrollTop = chat.scrollHeight;
 });
-
