@@ -1,12 +1,12 @@
 // 🔥 Firebase config (PASTE YOUR REAL VALUES)
 const firebaseConfig = {
-  apiKey: "PASTE_HERE",
-  authDomain: "PASTE_HERE",
-  databaseURL: "PASTE_HERE",
-  projectId: "PASTE_HERE",
-  storageBucket: "PASTE_HERE",
-  messagingSenderId: "PASTE_HERE",
-  appId: "PASTE_HERE"
+  apiKey: "AIzaSyDvtlpnynC-wgtHuaLRrZ4aDaWqB1Dkm5E",
+  authDomain: "pro-org-7d220.firebaseapp.com",
+  databaseURL: "https://pro-org-7d220-default-rtdb.firebaseio.com",
+  projectId: "pro-org-7d220",
+  storageBucket: "pro-org-7d220.firebasestorage.app",
+  messagingSenderId: "774457096727",
+  appId: "1:774457096727:web:dec2a9bc7a02b638083a52"
 };
 
 // Initialize Firebase
