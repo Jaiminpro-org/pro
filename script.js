@@ -1,22 +1,16 @@
-// 🔥 Firebase config (PASTE YOUR REAL VALUES)
-const firebaseConfig = {
-  apiKey: "AIzaSyDvtlpnynC-wgtHuaLRrZ4aDaWqB1Dkm5E",
-  authDomain: "pro-org-7d220.firebaseapp.com",
-  databaseURL: "https://pro-org-7d220-default-rtdb.firebaseio.com",
-  projectId: "pro-org-7d220",
-  storageBucket: "pro-org-7d220.firebasestorage.app",
-  messagingSenderId: "774457096727",
-  appId: "1:774457096727:web:dec2a9bc7a02b638083a52"
-};
-
-// Initialize Firebase
-firebase.initializeApp(firebaseConfig);
-
-// Database
-const db = firebase.database();
-const messagesRef = db.ref("messages");
+import { app } from "./firebase.js";
+import {
+  getDatabase,
+  ref,
+  push,
+  onChildAdded
+} from "https://www.gstatic.com/firebasejs/12.8.0/firebase-database.js";
 
 console.log("JS loaded");
+
+// Database
+const db = getDatabase(app);
+const messagesRef = ref(db, "messages");
 
 // Elements
 const chat = document.getElementById("chat");
@@ -32,14 +26,12 @@ if (!username) {
   localStorage.setItem("username", username);
 }
 
-// ✅ SEND MESSAGE (ONLY PUSH TO FIREBASE)
-function sendMessage(e) {
-  if (e) e.preventDefault();
-
+// Send message
+function sendMessage() {
   const text = input.value.trim();
-  if (text === "") return;
+  if (!text) return;
 
-  messagesRef.push({
+  push(messagesRef, {
     name: username,
     text: text,
     time: Date.now()
@@ -52,25 +44,23 @@ function sendMessage(e) {
 button.addEventListener("click", sendMessage);
 
 // Enter key
-input.addEventListener("keydown", function (e) {
-  if (e.key === "Enter") {
-    sendMessage(e);
-  }
+input.addEventListener("keydown", (e) => {
+  if (e.key === "Enter") sendMessage();
 });
 
-// Clear chat (local only)
-clearBtn.addEventListener("click", function () {
+// Clear chat (UI only)
+clearBtn.addEventListener("click", () => {
   chat.innerHTML = "";
 });
 
 // Change name
-changeNameBtn.addEventListener("click", function () {
+changeNameBtn.addEventListener("click", () => {
   localStorage.removeItem("username");
   location.reload();
 });
 
-// ✅ REALTIME LISTENER (UI IS BUILT HERE ONLY)
-messagesRef.on("child_added", function (snapshot) {
+// Realtime listener
+onChildAdded(messagesRef, (snapshot) => {
   const data = snapshot.val();
 
   const msg = document.createElement("div");
