@@ -3,7 +3,9 @@ import {
   getDatabase,
   ref,
   push,
-  onChildAdded
+  onChildAdded,
+  set,
+  onValue
 } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-database.js";
 
 console.log("JS loaded");
@@ -11,8 +13,7 @@ console.log("JS loaded");
 // Database
 const db = getDatabase(app);
 const messagesRef = ref(db, "messages");
-const typingRef = db.ref("typing");
-
+const typingRef = ref(db, "typing");
 
 // Elements
 const chat = document.getElementById("chat");
@@ -21,9 +22,10 @@ const button = document.getElementById("sendBtn");
 const clearBtn = document.getElementById("clearBtn");
 const changeNameBtn = document.getElementById("changeNameBtn");
 const emojiBtn = document.getElementById("emojiBtn");
+const typingStatus = document.getElementById("typingStatus");
 
+// Emoji
 const emojis = ["😀","😂","😍","😎","🔥","💙","👍","🥲","😜","❤️"];
-
 emojiBtn.addEventListener("click", () => {
   const emoji = emojis[Math.floor(Math.random() * emojis.length)];
   input.value += emoji;
@@ -37,7 +39,7 @@ if (!username) {
   localStorage.setItem("username", username);
 }
 
-// Send message
+// ✅ SEND MESSAGE
 function sendMessage() {
   const text = input.value.trim();
   if (!text) return;
@@ -49,25 +51,27 @@ function sendMessage() {
   });
 
   input.value = "";
+  set(typingRef, "");
 }
 
-// Button click
+// Button
 button.addEventListener("click", sendMessage);
 
 // Enter key
 input.addEventListener("keydown", (e) => {
   if (e.key === "Enter") sendMessage();
-  let typingTimeout;
+});
+
+// ✅ TYPING INDICATOR
+let typingTimeout;
 
 input.addEventListener("input", () => {
-  typingRef.set(username);
+  set(typingRef, username);
 
   clearTimeout(typingTimeout);
   typingTimeout = setTimeout(() => {
-    typingRef.set("");
+    set(typingRef, "");
   }, 1500);
-});
-
 });
 
 // Clear chat (UI only)
@@ -81,7 +85,7 @@ changeNameBtn.addEventListener("click", () => {
   location.reload();
 });
 
-// Realtime listener
+// ✅ REALTIME MESSAGES
 onChildAdded(messagesRef, (snapshot) => {
   const data = snapshot.val();
 
@@ -109,15 +113,10 @@ onChildAdded(messagesRef, (snapshot) => {
   chat.appendChild(msg);
   chat.scrollTop = chat.scrollHeight;
 });
-const typingStatus = document.getElementById("typingStatus");
 
-typingRef.on("value", (snapshot) => {
+// ✅ LISTEN FOR TYPING
+onValue(typingRef, (snapshot) => {
   const name = snapshot.val();
-
-  if (name && name !== username) {
-    typingStatus.innerText = `${name} is typing...`;
-  } else {
-    typingStatus.innerText = "";
-  }
+  typingStatus.innerText =
+    name && name !== username ? `${name} is typing...` : "";
 });
-
