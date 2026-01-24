@@ -18,6 +18,15 @@ const input = document.getElementById("messageInput");
 const button = document.getElementById("sendBtn");
 const clearBtn = document.getElementById("clearBtn");
 const changeNameBtn = document.getElementById("changeNameBtn");
+const emojiBtn = document.getElementById("emojiBtn");
+
+const emojis = ["😀","😂","😍","😎","🔥","💙","👍","🥲","😜","❤️"];
+
+emojiBtn.addEventListener("click", () => {
+  const emoji = emojis[Math.floor(Math.random() * emojis.length)];
+  input.value += emoji;
+  input.focus();
+});
 
 // Username
 let username = localStorage.getItem("username");

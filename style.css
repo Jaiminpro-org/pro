@@ -127,3 +127,19 @@ button {
   background: #bbb;
   border-radius: 5px;
 }
+/* Input row */
+.input-row {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 8px;
+}
+
+#emojiBtn {
+  width: 45px;
+  font-size: 20px;
+  background: #f1f1f1;
+}
+
+#emojiBtn:hover {
+  background: #e0e0e0;
+}
