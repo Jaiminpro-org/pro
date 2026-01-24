@@ -11,6 +11,8 @@ console.log("JS loaded");
 // Database
 const db = getDatabase(app);
 const messagesRef = ref(db, "messages");
+const typingRef = db.ref("typing");
+
 
 // Elements
 const chat = document.getElementById("chat");
