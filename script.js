@@ -57,6 +57,17 @@ button.addEventListener("click", sendMessage);
 // Enter key
 input.addEventListener("keydown", (e) => {
   if (e.key === "Enter") sendMessage();
+  let typingTimeout;
+
+input.addEventListener("input", () => {
+  typingRef.set(username);
+
+  clearTimeout(typingTimeout);
+  typingTimeout = setTimeout(() => {
+    typingRef.set("");
+  }, 1500);
+});
+
 });
 
 // Clear chat (UI only)
