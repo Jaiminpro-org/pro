@@ -109,3 +109,15 @@ onChildAdded(messagesRef, (snapshot) => {
   chat.appendChild(msg);
   chat.scrollTop = chat.scrollHeight;
 });
+const typingStatus = document.getElementById("typingStatus");
+
+typingRef.on("value", (snapshot) => {
+  const name = snapshot.val();
+
+  if (name && name !== username) {
+    typingStatus.innerText = `${name} is typing...`;
+  } else {
+    typingStatus.innerText = "";
+  }
+});
+
