@@ -176,9 +176,9 @@ body.dark .message.me {
 }
 
 body.dark .message.other {
-  background: #333;
+  background: #535050;
 }
 
 body.dark #typingStatus {
-  color: #aaa;
+  color: #b8b4b4;
 }
