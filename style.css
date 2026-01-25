@@ -150,3 +150,35 @@ button {
   margin-bottom: 5px;
   font-style: italic;
 }
+/* 🌙 DARK MODE */
+body.dark {
+  background: #121212;
+  color: #eee;
+}
+
+body.dark .app {
+  background: #1e1e1e;
+}
+
+body.dark #chat {
+  background: #181818;
+}
+
+body.dark input,
+body.dark button {
+  background: #2a2a2a;
+  color: #fff;
+  border: 1px solid #444;
+}
+
+body.dark .message.me {
+  background: #2b5cff;
+}
+
+body.dark .message.other {
+  background: #333;
+}
+
+body.dark #typingStatus {
+  color: #aaa;
+}

@@ -25,6 +25,7 @@ const emojiBtn = document.getElementById("emojiBtn");
 const typingStatus = document.getElementById("typingStatus");
 const sendSound = new Audio("send.mp3");
 sendSound.volume = 0.6;
+const themeBtn = document.getElementById("themeBtn");
 
 
 // Emoji
@@ -126,4 +127,18 @@ onValue(typingRef, (snapshot) => {
   const name = snapshot.val();
   typingStatus.innerText =
     name && name !== username ? `${name} is typing...` : "";
+});
+// 🌙 Dark mode toggle
+const savedTheme = localStorage.getItem("theme");
+if (savedTheme === "dark") {
+  document.body.classList.add("dark");
+  themeBtn.innerText = "☀️ Light";
+}
+
+themeBtn.addEventListener("click", () => {
+  document.body.classList.toggle("dark");
+
+  const isDark = document.body.classList.contains("dark");
+  themeBtn.innerText = isDark ? "☀️ Light" : "🌙 Dark";
+  localStorage.setItem("theme", isDark ? "dark" : "light");
 });
