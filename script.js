@@ -6,39 +6,51 @@ import {
   onChildAdded,
   set,
   onValue,
-  onDisconnect
+  onDisconnect,
+  update
 } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-database.js";
 
-console.log("JS loaded");
+console.log("🔥 PRO Messenger Loaded");
 
-// 🔥 Database
-const db = getDatabase(app);
-const messagesRef = ref(db, `chats/${chatId}/messages`);
-
-const typingRef = ref(db, "typing");
-
-// 👤 Username
+// ======================
+// 👤 USERNAME
+// ======================
 let username = localStorage.getItem("username");
 if (!username) {
   username = prompt("Enter your name:");
   localStorage.setItem("username", username);
 }
-function getChatId(user1, user2) {
-  return [user1, user2].sort().join("_");
+
+// ======================
+// 🔐 PRIVATE CHAT ID
+// ======================
+function getChatId(u1, u2) {
+  return [u1, u2].sort().join("_");
 }
-let partner = prompt("Chat with who?");
+
+const partner = prompt("Chat with who?");
 const chatId = getChatId(username, partner);
 
+// ======================
+// 🔥 DATABASE
+// ======================
+const db = getDatabase(app);
+const messagesRef = ref(db, `chats/${chatId}/messages`);
+const typingRef = ref(db, `chats/${chatId}/typing`);
+const onlineRef = ref(db, `onlineUsers/${username}`);
 
-// 🟢 Online presence
-const onlineRef = ref(db, "onlineUsers/" + username);
+// ======================
+// 🟢 ONLINE STATUS
+// ======================
 set(onlineRef, true);
 onDisconnect(onlineRef).remove();
 
-// 🎯 Elements
+// ======================
+// 🎯 ELEMENTS
+// ======================
 const chat = document.getElementById("chat");
 const input = document.getElementById("messageInput");
-const button = document.getElementById("sendBtn");
+const sendBtn = document.getElementById("sendBtn");
 const clearBtn = document.getElementById("clearBtn");
 const changeNameBtn = document.getElementById("changeNameBtn");
 const emojiBtn = document.getElementById("emojiBtn");
@@ -46,21 +58,25 @@ const typingStatus = document.getElementById("typingStatus");
 const onlineUsersDiv = document.getElementById("onlineUsers");
 const themeBtn = document.getElementById("themeBtn");
 
-// 🔊 Sound
+// ======================
+// 🔊 SOUND
+// ======================
 const sendSound = new Audio("send.mp3");
 sendSound.volume = 0.6;
 
-// 😀 Emoji
+// ======================
+// 😀 EMOJI
+// ======================
 const emojis = ["😀","😂","😍","😎","🔥","💙","👍","🥲","😜","❤️"];
 emojiBtn.addEventListener("click", () => {
-  const emoji = emojis[Math.floor(Math.random() * emojis.length)];
-  input.value += emoji;
+  input.value += emojis[Math.floor(Math.random() * emojis.length)];
   input.focus();
 });
 
-// 🌙 Dark mode
-const savedTheme = localStorage.getItem("theme");
-if (savedTheme === "dark") {
+// ======================
+// 🌙 DARK MODE
+// ======================
+if (localStorage.getItem("theme") === "dark") {
   document.body.classList.add("dark");
   themeBtn.innerText = "☀️ Light";
 }
@@ -72,18 +88,20 @@ themeBtn.addEventListener("click", () => {
   localStorage.setItem("theme", isDark ? "dark" : "light");
 });
 
-// ✉️ Send message
+// ======================
+// ✉️ SEND MESSAGE
+// ======================
 function sendMessage() {
   const text = input.value.trim();
   if (!text) return;
 
- push(messagesRef, {
-  name: username,
-  text: text,
-  time: Date.now(),
-  status: "sent"
-});
-
+  const msgRef = push(messagesRef);
+  set(msgRef, {
+    name: username,
+    text,
+    time: Date.now(),
+    status: "sent"
+  });
 
   sendSound.currentTime = 0;
   sendSound.play();
@@ -92,87 +110,70 @@ function sendMessage() {
   set(typingRef, "");
 }
 
-// Buttons
-button.addEventListener("click", sendMessage);
-
-input.addEventListener("keydown", (e) => {
+sendBtn.addEventListener("click", sendMessage);
+input.addEventListener("keydown", e => {
   if (e.key === "Enter") sendMessage();
 });
 
-// ✍️ Typing indicator
+// ======================
+// ✍️ TYPING INDICATOR
+// ======================
 let typingTimeout;
 input.addEventListener("input", () => {
   set(typingRef, username);
-
   clearTimeout(typingTimeout);
-  typingTimeout = setTimeout(() => {
-    set(typingRef, "");
-  }, 1500);
+  typingTimeout = setTimeout(() => set(typingRef, ""), 1500);
 });
 
-// 🧹 Clear chat (UI only)
-clearBtn.addEventListener("click", () => {
-  chat.innerHTML = "";
+onValue(typingRef, snap => {
+  const name = snap.val();
+  typingStatus.innerText =
+    name && name !== username ? `${name} is typing...` : "";
 });
 
-// 🔁 Change name
-changeNameBtn.addEventListener("click", () => {
-  localStorage.removeItem("username");
-  location.reload();
-});
-
-// 💬 Realtime messages
-onChildAdded(messagesRef, (snapshot) => {
+// ======================
+// 💬 REALTIME MESSAGES
+// ======================
+onChildAdded(messagesRef, snapshot => {
   const data = snapshot.val();
+  const msgKey = snapshot.key;
 
   const msg = document.createElement("div");
-  msg.classList.add("message", data.name === username ? "me" : "other");
+  msg.className = `message ${data.name === username ? "me" : "other"}`;
 
-  const name = document.createElement("div");
-  name.className = "username";
-  name.innerText = data.name;
-
-  const text = document.createElement("div");
-  text.innerText = data.text;
-const time = document.createElement("div");
-time.className = "time";
-
-let ticks = "";
-if (data.name === username) {
-  ticks = data.status === "seen" ? " ✔✔" : " ✔";
-}
-
-time.innerText =
-  new Date(data.time).toLocaleTimeString([], {
-    hour: "2-digit",
-    minute: "2-digit"
-  }) + ticks;
-
-
-  msg.appendChild(name);
-  msg.appendChild(text);
-  msg.appendChild(time);
+  msg.innerHTML = `
+    <div class="username">${data.name}</div>
+    <div>${data.text}</div>
+    <div class="time">
+      ${new Date(data.time).toLocaleTimeString([], {hour:"2-digit",minute:"2-digit"})}
+      ${data.name === username ? (data.status === "seen" ? " ✔✔" : " ✔") : ""}
+    </div>
+  `;
 
   chat.appendChild(msg);
   chat.scrollTop = chat.scrollHeight;
-  // Mark message as SEEN if it is not mine
-if (data.name !== username) {
-  const msgRef = ref(db, "messages/" + snapshot.key);
-  set(ref(db, `messages/${snapshot.key}/status`), "seen");
-}
 
+  // 👁️ MARK SEEN
+  if (data.name !== username) {
+    update(ref(db, `chats/${chatId}/messages/${msgKey}`), {
+      status: "seen"
+    });
+  }
 });
 
-// 🟢 Online users count
-const onlineUsersRef = ref(db, "onlineUsers");
-onValue(onlineUsersRef, (snapshot) => {
-  const users = snapshot.val() || {};
+// ======================
+// 🟢 ONLINE USERS COUNT
+// ======================
+onValue(ref(db, "onlineUsers"), snap => {
+  const users = snap.val() || {};
   onlineUsersDiv.innerText = `🟢 Online: ${Object.keys(users).length}`;
 });
 
-// ⌨️ Typing listener
-onValue(typingRef, (snapshot) => {
-  const name = snapshot.val();
-  typingStatus.innerText =
-    name && name !== username ? `${name} is typing...` : "";
+// ======================
+// 🧹 UTILITIES
+// ======================
+clearBtn.addEventListener("click", () => chat.innerHTML = "");
+changeNameBtn.addEventListener("click", () => {
+  localStorage.removeItem("username");
+  location.reload();
 });
