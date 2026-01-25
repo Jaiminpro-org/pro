@@ -70,11 +70,13 @@ function sendMessage() {
   const text = input.value.trim();
   if (!text) return;
 
-  push(messagesRef, {
-    name: username,
-    text: text,
-    time: Date.now()
-  });
+ push(messagesRef, {
+  name: username,
+  text: text,
+  time: Date.now(),
+  status: "sent"
+});
+
 
   sendSound.currentTime = 0;
   sendSound.play();
@@ -125,13 +127,20 @@ onChildAdded(messagesRef, (snapshot) => {
 
   const text = document.createElement("div");
   text.innerText = data.text;
+const time = document.createElement("div");
+time.className = "time";
 
-  const time = document.createElement("div");
-  time.className = "time";
-  time.innerText = new Date(data.time).toLocaleTimeString([], {
+let ticks = "";
+if (data.name === username) {
+  ticks = data.status === "seen" ? " ✔✔" : " ✔";
+}
+
+time.innerText =
+  new Date(data.time).toLocaleTimeString([], {
     hour: "2-digit",
     minute: "2-digit"
-  });
+  }) + ticks;
+
 
   msg.appendChild(name);
   msg.appendChild(text);
@@ -139,6 +148,12 @@ onChildAdded(messagesRef, (snapshot) => {
 
   chat.appendChild(msg);
   chat.scrollTop = chat.scrollHeight;
+  // Mark message as SEEN if it is not mine
+if (data.name !== username) {
+  const msgRef = ref(db, "messages/" + snapshot.key);
+  set(ref(db, `messages/${snapshot.key}/status`), "seen");
+}
+
 });
 
 // 🟢 Online users count
