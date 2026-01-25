@@ -23,6 +23,9 @@ const clearBtn = document.getElementById("clearBtn");
 const changeNameBtn = document.getElementById("changeNameBtn");
 const emojiBtn = document.getElementById("emojiBtn");
 const typingStatus = document.getElementById("typingStatus");
+const sendSound = new Audio("send.mp3");
+sendSound.volume = 0.6;
+
 
 // Emoji
 const emojis = ["😀","😂","😍","😎","🔥","💙","👍","🥲","😜","❤️"];
@@ -50,8 +53,12 @@ function sendMessage() {
     time: Date.now()
   });
 
+   sendSound.currentTime = 0; // reset sound
+  sendSound.play();         // 🔔 PLAY SOUND
+
   input.value = "";
   set(typingRef, "");
+
 }
 
 // Button
