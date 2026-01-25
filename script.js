@@ -13,7 +13,8 @@ console.log("JS loaded");
 
 // 🔥 Database
 const db = getDatabase(app);
-const messagesRef = ref(db, "messages");
+const messagesRef = ref(db, `chats/${chatId}/messages`);
+
 const typingRef = ref(db, "typing");
 
 // 👤 Username
@@ -22,6 +23,12 @@ if (!username) {
   username = prompt("Enter your name:");
   localStorage.setItem("username", username);
 }
+function getChatId(user1, user2) {
+  return [user1, user2].sort().join("_");
+}
+let partner = prompt("Chat with who?");
+const chatId = getChatId(username, partner);
+
 
 // 🟢 Online presence
 const onlineRef = ref(db, "onlineUsers/" + username);
