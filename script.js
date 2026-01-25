@@ -6,20 +6,29 @@ import {
   onChildAdded,
   set,
   onValue,
-  onDisconnect,
-  remove
+  onDisconnect
 } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-database.js";
 
 console.log("JS loaded");
 
-// Database
+// 🔥 Database
 const db = getDatabase(app);
 const messagesRef = ref(db, "messages");
 const typingRef = ref(db, "typing");
+
+// 👤 Username
+let username = localStorage.getItem("username");
+if (!username) {
+  username = prompt("Enter your name:");
+  localStorage.setItem("username", username);
+}
+
+// 🟢 Online presence
 const onlineRef = ref(db, "onlineUsers/" + username);
+set(onlineRef, true);
+onDisconnect(onlineRef).remove();
 
-
-// Elements
+// 🎯 Elements
 const chat = document.getElementById("chat");
 const input = document.getElementById("messageInput");
 const button = document.getElementById("sendBtn");
@@ -27,12 +36,14 @@ const clearBtn = document.getElementById("clearBtn");
 const changeNameBtn = document.getElementById("changeNameBtn");
 const emojiBtn = document.getElementById("emojiBtn");
 const typingStatus = document.getElementById("typingStatus");
-const sendSound = new Audio("send.mp3");
-sendSound.volume = 0.6;
+const onlineUsersDiv = document.getElementById("onlineUsers");
 const themeBtn = document.getElementById("themeBtn");
 
+// 🔊 Sound
+const sendSound = new Audio("send.mp3");
+sendSound.volume = 0.6;
 
-// Emoji
+// 😀 Emoji
 const emojis = ["😀","😂","😍","😎","🔥","💙","👍","🥲","😜","❤️"];
 emojiBtn.addEventListener("click", () => {
   const emoji = emojis[Math.floor(Math.random() * emojis.length)];
@@ -40,19 +51,21 @@ emojiBtn.addEventListener("click", () => {
   input.focus();
 });
 
-// Username
-let username = localStorage.getItem("username");
-if (!username) {
-  username = prompt("Enter your name:");
-  localStorage.setItem("username", username);
-  set(onlineRef, true);
-
-// Remove user when disconnected
-onDisconnect(onlineRef).remove();
-
+// 🌙 Dark mode
+const savedTheme = localStorage.getItem("theme");
+if (savedTheme === "dark") {
+  document.body.classList.add("dark");
+  themeBtn.innerText = "☀️ Light";
 }
 
-// ✅ SEND MESSAGE
+themeBtn.addEventListener("click", () => {
+  document.body.classList.toggle("dark");
+  const isDark = document.body.classList.contains("dark");
+  themeBtn.innerText = isDark ? "☀️ Light" : "🌙 Dark";
+  localStorage.setItem("theme", isDark ? "dark" : "light");
+});
+
+// ✉️ Send message
 function sendMessage() {
   const text = input.value.trim();
   if (!text) return;
@@ -63,25 +76,22 @@ function sendMessage() {
     time: Date.now()
   });
 
-   sendSound.currentTime = 0; // reset sound
-  sendSound.play();         // 🔔 PLAY SOUND
+  sendSound.currentTime = 0;
+  sendSound.play();
 
   input.value = "";
   set(typingRef, "");
-
 }
 
-// Button
+// Buttons
 button.addEventListener("click", sendMessage);
 
-// Enter key
 input.addEventListener("keydown", (e) => {
   if (e.key === "Enter") sendMessage();
 });
 
-// ✅ TYPING INDICATOR
+// ✍️ Typing indicator
 let typingTimeout;
-
 input.addEventListener("input", () => {
   set(typingRef, username);
 
@@ -91,18 +101,18 @@ input.addEventListener("input", () => {
   }, 1500);
 });
 
-// Clear chat (UI only)
+// 🧹 Clear chat (UI only)
 clearBtn.addEventListener("click", () => {
   chat.innerHTML = "";
 });
 
-// Change name
+// 🔁 Change name
 changeNameBtn.addEventListener("click", () => {
   localStorage.removeItem("username");
   location.reload();
 });
 
-// ✅ REALTIME MESSAGES
+// 💬 Realtime messages
 onChildAdded(messagesRef, (snapshot) => {
   const data = snapshot.val();
 
@@ -131,32 +141,16 @@ onChildAdded(messagesRef, (snapshot) => {
   chat.scrollTop = chat.scrollHeight;
 });
 
-// ✅ LISTEN FOR TYPING
+// 🟢 Online users count
+const onlineUsersRef = ref(db, "onlineUsers");
+onValue(onlineUsersRef, (snapshot) => {
+  const users = snapshot.val() || {};
+  onlineUsersDiv.innerText = `🟢 Online: ${Object.keys(users).length}`;
+});
+
+// ⌨️ Typing listener
 onValue(typingRef, (snapshot) => {
   const name = snapshot.val();
   typingStatus.innerText =
     name && name !== username ? `${name} is typing...` : "";
-});
-// 🌙 Dark mode toggle
-const savedTheme = localStorage.getItem("theme");
-if (savedTheme === "dark") {
-  document.body.classList.add("dark");
-  themeBtn.innerText = "☀️ Light";
-}
-
-themeBtn.addEventListener("click", () => {
-  document.body.classList.toggle("dark");
-
-  const isDark = document.body.classList.contains("dark");
-  themeBtn.innerText = isDark ? "☀️ Light" : "🌙 Dark";
-  localStorage.setItem("theme", isDark ? "dark" : "light");
-});
-const onlineUsersDiv = document.getElementById("onlineUsers");
-
-const onlineUsersRef = ref(db, "onlineUsers");
-
-onValue(onlineUsersRef, (snapshot) => {
-  const users = snapshot.val() || {};
-  const count = Object.keys(users).length;
-  onlineUsersDiv.innerText = `🟢 Online: ${count}`;
 });
