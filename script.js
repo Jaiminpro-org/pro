@@ -5,7 +5,9 @@ import {
   push,
   onChildAdded,
   set,
-  onValue
+  onValue,
+  onDisconnect,
+  remove
 } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-database.js";
 
 console.log("JS loaded");
@@ -14,6 +16,8 @@ console.log("JS loaded");
 const db = getDatabase(app);
 const messagesRef = ref(db, "messages");
 const typingRef = ref(db, "typing");
+const onlineRef = ref(db, "onlineUsers/" + username);
+
 
 // Elements
 const chat = document.getElementById("chat");
@@ -41,6 +45,11 @@ let username = localStorage.getItem("username");
 if (!username) {
   username = prompt("Enter your name:");
   localStorage.setItem("username", username);
+  set(onlineRef, true);
+
+// Remove user when disconnected
+onDisconnect(onlineRef).remove();
+
 }
 
 // ✅ SEND MESSAGE
@@ -141,4 +150,13 @@ themeBtn.addEventListener("click", () => {
   const isDark = document.body.classList.contains("dark");
   themeBtn.innerText = isDark ? "☀️ Light" : "🌙 Dark";
   localStorage.setItem("theme", isDark ? "dark" : "light");
+});
+const onlineUsersDiv = document.getElementById("onlineUsers");
+
+const onlineUsersRef = ref(db, "onlineUsers");
+
+onValue(onlineUsersRef, (snapshot) => {
+  const users = snapshot.val() || {};
+  const count = Object.keys(users).length;
+  onlineUsersDiv.innerText = `🟢 Online: ${count}`;
 });

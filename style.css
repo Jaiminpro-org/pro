@@ -182,3 +182,9 @@ body.dark .message.other {
 body.dark #typingStatus {
   color: #b8b4b4;
 }
+#onlineUsers {
+  font-size: 13px;
+  margin-bottom: 6px;
+  color: green;
+}
+
