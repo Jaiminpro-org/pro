@@ -1,3 +1,9 @@
+import { auth, provider } from "./firebase.js";
+import {
+  signInWithPopup,
+  signOut,
+  onAuthStateChanged
+} from "https://www.gstatic.com/firebasejs/12.8.0/firebase-auth.js";
 import { app } from "./firebase.js";
 import {
   getDatabase,
@@ -41,6 +47,21 @@ if (!username) {
 const myOnlineRef = ref(db, "onlineUsers/" + username);
 set(myOnlineRef, true);
 onDisconnect(myOnlineRef).remove();
+const loginBtn = document.getElementById("loginBtn");
+const logoutBtn = document.getElementById("logoutBtn");
+
+loginBtn.onclick = async () => {
+  try {
+    await signInWithPopup(auth, provider);
+  } catch (err) {
+    alert(err.message);
+  }
+};
+
+logoutBtn.onclick = async () => {
+  await signOut(auth);
+};
+
 
 /* ---------- SEND MESSAGE ---------- */
 function sendMessage() {
@@ -134,3 +155,20 @@ themeBtn.onclick = () => {
   themeBtn.innerText = dark ? "☀️ Light" : "🌙 Dark";
   localStorage.setItem("theme", dark ? "dark" : "light");
 };
+onAuthStateChanged(auth, user => {
+  if (user) {
+    username = user.displayName;
+    localStorage.setItem("username", username);
+
+    loginBtn.style.display = "none";
+    logoutBtn.style.display = "block";
+
+    const myOnlineRef = ref(db, "onlineUsers/" + username);
+    set(myOnlineRef, true);
+    onDisconnect(myOnlineRef).remove();
+  } else {
+    loginBtn.style.display = "block";
+    logoutBtn.style.display = "none";
+    chat.innerHTML = "";
+  }
+});
