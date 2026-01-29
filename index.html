@@ -1,39 +1,33 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
   <title>PRO Messenger</title>
-
-  <!-- CSS LINK -->
-  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="style.css" />
 </head>
 <body>
 
-  <div class="app">
-    <h2>PRO Messenger</h2>
-     <div id="usernameBox"></div>
-<div id="typingStatus"></div>
-<div id="onlineUsers">🟢 Online: 0</div>
+<div class="app">
+  <h2>💬 PRO Messenger</h2>
 
- <div id="chat"></div>
+  <div id="usernameBox"></div>
+  <div id="onlineUsers">🟢 Online: 0</div>
+  <div id="typingStatus"></div>
 
-   <div class="input-row">
-  <button id="emojiBtn">😊</button>
-  <input id="messageInput" type="text" placeholder="Type message">
+  <div id="chat"></div>
+
+  <div class="input-row">
+    <button id="emojiBtn">😊</button>
+    <input id="messageInput" placeholder="Type a message…" />
+  </div>
+
+  <button id="sendBtn">Send</button>
+  <button id="clearBtn">Clear Chat</button>
+  <button id="changeNameBtn">Change Name</button>
+  <button id="themeBtn">🌙 Dark</button>
 </div>
 
-<button id="sendBtn">Send</button>
-
-    <button id="clearBtn">Clear Chat</button>
-    <button id="changeNameBtn">Change Name</button>
-    <button id="themeBtn">🌙 Dark</button>
-
-
-
-  </div>
 <script type="module" src="firebase.js"></script>
 <script type="module" src="script.js"></script>
-
 </body>
 </html>
-

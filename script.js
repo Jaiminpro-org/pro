@@ -1,131 +1,136 @@
-// 🔥 IMPORTS
 import { app } from "./firebase.js";
-import {
-  getAuth,
-  signInAnonymously,
-  onAuthStateChanged
-} from "https://www.gstatic.com/firebasejs/12.8.0/firebase-auth.js";
-
 import {
   getDatabase,
   ref,
   push,
   onChildAdded,
   set,
-  onDisconnect
+  onValue,
+  onDisconnect,
+  remove
 } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-database.js";
 
-console.log("JS loaded");
-
-// 🔐 AUTH
-const auth = getAuth(app);
-
-// 🗄️ DATABASE
+/* ---------- BASIC SETUP ---------- */
 const db = getDatabase(app);
 const messagesRef = ref(db, "messages");
-const usersRef = ref(db, "users");
+const typingRef = ref(db, "typing");
+const onlineUsersRef = ref(db, "onlineUsers");
 
-// 🎯 ELEMENTS
+/* ---------- ELEMENTS ---------- */
 const chat = document.getElementById("chat");
 const input = document.getElementById("messageInput");
 const sendBtn = document.getElementById("sendBtn");
 const clearBtn = document.getElementById("clearBtn");
 const changeNameBtn = document.getElementById("changeNameBtn");
+const emojiBtn = document.getElementById("emojiBtn");
+const typingStatus = document.getElementById("typingStatus");
+const onlineUsersDiv = document.getElementById("onlineUsers");
+const themeBtn = document.getElementById("themeBtn");
 
-let currentUser = null;
+const sendSound = new Audio("send.mp3");
+sendSound.volume = 0.6;
+
+/* ---------- USERNAME ---------- */
 let username = localStorage.getItem("username");
 
-// 🔐 SIGN IN ANONYMOUSLY
-signInAnonymously(auth).catch((error) => {
-  console.error("Auth error:", error);
-});
+if (!username) {
+  username = prompt("Enter your name");
+  localStorage.setItem("username", username);
+}
 
-// 👤 AUTH STATE
-onAuthStateChanged(auth, (user) => {
-  if (user) {
-    currentUser = user;
+const myOnlineRef = ref(db, "onlineUsers/" + username);
+set(myOnlineRef, true);
+onDisconnect(myOnlineRef).remove();
 
-    // Ask username once
-    if (!username) {
-      username = prompt("Enter your name:");
-      localStorage.setItem("username", username);
-    }
-
-    // Save user
-    const userRef = ref(db, "users/" + user.uid);
-    set(userRef, {
-      name: username,
-      online: true
-    });
-
-    // Remove on disconnect
-    onDisconnect(userRef).update({
-      online: false
-    });
-  }
-});
-
-// 📤 SEND MESSAGE
+/* ---------- SEND MESSAGE ---------- */
 function sendMessage() {
   const text = input.value.trim();
-  if (!text || !currentUser) return;
+  if (!text) return;
 
   push(messagesRef, {
-    uid: currentUser.uid,
     name: username,
-    text: text,
+    text,
     time: Date.now()
   });
 
+  sendSound.currentTime = 0;
+  sendSound.play();
+
   input.value = "";
+  set(typingRef, "");
 }
 
-// EVENTS
-sendBtn.addEventListener("click", sendMessage);
-
-input.addEventListener("keydown", (e) => {
+sendBtn.onclick = sendMessage;
+input.addEventListener("keydown", e => {
   if (e.key === "Enter") sendMessage();
 });
 
-// 🧹 CLEAR CHAT (UI ONLY)
-clearBtn.addEventListener("click", () => {
-  chat.innerHTML = "";
+/* ---------- TYPING STATUS ---------- */
+let typingTimer;
+input.addEventListener("input", () => {
+  set(typingRef, username);
+  clearTimeout(typingTimer);
+  typingTimer = setTimeout(() => set(typingRef, ""), 1500);
 });
 
-// 🔁 CHANGE NAME
-changeNameBtn.addEventListener("click", () => {
-  localStorage.removeItem("username");
-  location.reload();
-});
+/* ---------- EMOJI ---------- */
+const emojis = ["😀","😂","😍","😎","🔥","💙","👍","🥲","😜","❤️"];
+emojiBtn.onclick = () => {
+  input.value += emojis[Math.floor(Math.random() * emojis.length)];
+  input.focus();
+};
 
-// 💬 REALTIME MESSAGES
-onChildAdded(messagesRef, (snapshot) => {
-  const data = snapshot.val();
+/* ---------- CHAT LISTENER ---------- */
+onChildAdded(messagesRef, snap => {
+  const data = snap.val();
 
   const msg = document.createElement("div");
-  msg.classList.add(
-    "message",
-    data.uid === currentUser?.uid ? "me" : "other"
-  );
+  msg.className = "message " + (data.name === username ? "me" : "other");
 
-  const name = document.createElement("div");
-  name.className = "username";
-  name.innerText = data.name;
-
-  const text = document.createElement("div");
-  text.innerText = data.text;
-
-  const time = document.createElement("div");
-  time.className = "time";
-  time.innerText = new Date(data.time).toLocaleTimeString([], {
-    hour: "2-digit",
-    minute: "2-digit"
-  });
-
-  msg.appendChild(name);
-  msg.appendChild(text);
-  msg.appendChild(time);
+  msg.innerHTML = `
+    <div class="username">${data.name}</div>
+    <div>${data.text}</div>
+    <div class="time">${new Date(data.time).toLocaleTimeString([], {
+      hour: "2-digit",
+      minute: "2-digit"
+    })}</div>
+  `;
 
   chat.appendChild(msg);
   chat.scrollTop = chat.scrollHeight;
 });
+
+/* ---------- TYPING LISTENER ---------- */
+onValue(typingRef, snap => {
+  const name = snap.val();
+  typingStatus.innerText =
+    name && name !== username ? `${name} is typing...` : "";
+});
+
+/* ---------- ONLINE USERS ---------- */
+onValue(onlineUsersRef, snap => {
+  const users = snap.val() || {};
+  onlineUsersDiv.innerText = `🟢 Online: ${Object.keys(users).length}`;
+});
+
+/* ---------- UI ACTIONS ---------- */
+clearBtn.onclick = () => chat.innerHTML = "";
+
+changeNameBtn.onclick = () => {
+  localStorage.removeItem("username");
+  location.reload();
+};
+
+/* ---------- DARK MODE ---------- */
+const savedTheme = localStorage.getItem("theme");
+if (savedTheme === "dark") {
+  document.body.classList.add("dark");
+  themeBtn.innerText = "☀️ Light";
+}
+
+themeBtn.onclick = () => {
+  document.body.classList.toggle("dark");
+  const dark = document.body.classList.contains("dark");
+  themeBtn.innerText = dark ? "☀️ Light" : "🌙 Dark";
+  localStorage.setItem("theme", dark ? "dark" : "light");
+};
