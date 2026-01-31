@@ -15,6 +15,9 @@ import {
   onDisconnect,
   remove
 } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-database.js";
+let currentChatType = "public"; // public | private
+let currentPrivateChatId = null;
+let currentPrivateUser = null;
 
 /* ---------- BASIC SETUP ---------- */
 const db = getDatabase(app);
@@ -68,18 +71,30 @@ function sendMessage() {
   const text = input.value.trim();
   if (!text) return;
 
-  push(messagesRef, {
-    name: username,
-    text,
-    time: Date.now()
-  });
+  if (currentChatType === "public") {
+    push(messagesRef, {
+      name: username,
+      uid: auth.currentUser.uid,
+      text,
+      time: Date.now()
+    });
+  } else {
+    const privateRef = ref(
+      db,
+      `privateChats/${currentPrivateChatId}/messages`
+    );
 
-  sendSound.currentTime = 0;
-  sendSound.play();
+    push(privateRef, {
+      name: username,
+      uid: auth.currentUser.uid,
+      text,
+      time: Date.now()
+    });
+  }
 
   input.value = "";
-  set(typingRef, "");
 }
+
 
 sendBtn.onclick = sendMessage;
 input.addEventListener("keydown", e => {
@@ -129,10 +144,30 @@ onValue(typingRef, snap => {
 });
 
 /* ---------- ONLINE USERS ---------- */
-onValue(onlineUsersRef, snap => {
-  const users = snap.val() || {};
-  onlineUsersDiv.innerText = `🟢 Online: ${Object.keys(users).length}`;
-});
+function openPrivateChat(otherUid) {
+  currentChatType = "private";
+  currentPrivateUser = otherUid;
+
+  const myUid = auth.currentUser.uid;
+  currentPrivateChatId =
+    myUid < otherUid ? `${myUid}_${otherUid}` : `${otherUid}_${myUid}`;
+
+  chat.innerHTML = "";
+
+  document.getElementById("privateHeader").style.display = "block";
+  document.getElementById("privateWith").innerText =
+    "Private chat with " + otherUid;
+
+  const privateRef = ref(
+    db,
+    `privateChats/${currentPrivateChatId}/messages`
+  );
+
+  onChildAdded(privateRef, (snapshot) => {
+    renderMessage(snapshot.val());
+  });
+}
+
 
 /* ---------- UI ACTIONS ---------- */
 clearBtn.onclick = () => chat.innerHTML = "";
@@ -172,3 +207,6 @@ onAuthStateChanged(auth, user => {
     chat.innerHTML = "";
   }
 });
+document.getElementById("backToPublic").onclick = () => {
+  location.reload();
+};
