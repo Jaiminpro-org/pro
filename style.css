@@ -1,190 +1,110 @@
 * {
   box-sizing: border-box;
-  font-family: "Segoe UI", Roboto, Arial, sans-serif;
+  font-family: Arial, sans-serif;
 }
 
 body {
   margin: 0;
+  background: linear-gradient(135deg,#667eea,#764ba2);
   height: 100vh;
-  background: linear-gradient(135deg, #fbc2eb, #a6c1ee);
+}
+
+.center {
+  height: 100vh;
   display: flex;
+  flex-direction: column;
   justify-content: center;
   align-items: center;
+  color: white;
 }
 
-/* App card */
-.app {
-  width: 360px;
-  background: #fff;
-  border-radius: 16px;
-  padding: 15px;
-  box-shadow: 0 15px 40px rgba(0,0,0,0.2);
+button {
+  padding: 10px 14px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
 }
 
-/* Title */
-.app h2 {
-  text-align: center;
-  margin: 5px 0 10px;
-  color: #333;
+#googleLogin {
+  background: white;
+  color: black;
+  font-size: 16px;
 }
 
-/* Chat area */
+.hidden { display: none; }
+
+#chatApp {
+  max-width: 420px;
+  height: 100vh;
+  margin: auto;
+  background: #f4f4f4;
+  display: flex;
+  flex-direction: column;
+}
+
+header {
+  background: #4f46e5;
+  color: white;
+  padding: 10px;
+  display: flex;
+  justify-content: space-between;
+}
+
+#onlineUsers {
+  background: #e5e7eb;
+  padding: 6px;
+  font-size: 13px;
+}
+
+#onlineUsers button {
+  background: #ddd;
+  margin: 3px 0;
+  width: 100%;
+}
+
 #chat {
-  height: 280px;
-  border-radius: 10px;
+  flex: 1;
   padding: 10px;
   overflow-y: auto;
-  background: #f4f6fb;
-  margin-bottom: 10px;
 }
 
-/* Messages */
 .message {
-  max-width: 75%;
-  padding: 8px 10px;
-  margin-bottom: 10px;
-  border-radius: 12px;
-  font-size: 14px;
-  word-wrap: break-word;
+  margin: 6px 0;
+  max-width: 70%;
+  padding: 8px;
+  border-radius: 8px;
 }
 
-.message.me {
-  background: #0084ff;
+.me {
+  background: #4f46e5;
   color: white;
   margin-left: auto;
-  border-bottom-right-radius: 4px;
 }
 
-.message.other {
-  background: #e5e5ea;
-  color: #000;
-  margin-right: auto;
-  border-bottom-left-radius: 4px;
+.other {
+  background: white;
 }
 
-/* Username */
 .username {
   font-size: 11px;
-  font-weight: bold;
-  margin-bottom: 3px;
   opacity: 0.7;
 }
 
-/* Time */
-.time {
-  font-size: 10px;
-  opacity: 0.6;
-  text-align: right;
-  margin-top: 3px;
-}
-
-/* Input */
-#messageInput {
-  width: 100%;
-  padding: 10px;
-  border-radius: 8px;
-  border: 1px solid #ccc;
-  outline: none;
-  margin-bottom: 8px;
-}
-
-/* Buttons */
-button {
-  width: 100%;
-  padding: 10px;
-  border: none;
-  border-radius: 8px;
-  font-weight: bold;
-  cursor: pointer;
-  margin-bottom: 6px;
-  transition: 0.2s;
-}
-
-#sendBtn {
-  background: #0084ff;
-  color: white;
-}
-
-#sendBtn:hover {
-  background: #006fe0;
-}
-
-#clearBtn {
-  background: #ff4d4d;
-  color: white;
-}
-
-#changeNameBtn {
-  background: #444;
-  color: white;
-}
-
-/* Scrollbar clean */
-#chat::-webkit-scrollbar {
-  width: 6px;
-}
-#chat::-webkit-scrollbar-thumb {
-  background: #bbb;
-  border-radius: 5px;
-}
-/* Input row */
-.input-row {
+.inputBox {
   display: flex;
-  gap: 6px;
-  margin-bottom: 8px;
+  padding: 8px;
+  gap: 4px;
+  background: #ddd;
 }
 
-#emojiBtn {
-  width: 45px;
-  font-size: 20px;
-  background: #f1f1f1;
+input {
+  flex: 1;
+  padding: 8px;
 }
 
-#emojiBtn:hover {
-  background: #e0e0e0;
+.dark {
+  background: #111;
 }
-#typingStatus {
-  font-size: 13px;
-  color: #666;
-  height: 18px;
-  margin-bottom: 5px;
-  font-style: italic;
-}
-/* 🌙 DARK MODE */
-body.dark {
-  background: #121212;
-  color: #eee;
-}
-
-body.dark .app {
-  background: #1e1e1e;
-}
-
-body.dark #chat {
-  background: #181818;
-}
-
-body.dark input,
-body.dark button {
-  background: #2a2a2a;
-  color: #fff;
-  border: 1px solid #444;
-}
-
-body.dark .message.me {
-  background: #2b5cff;
-}
-
-body.dark .message.other {
-  background: #535050;
-}
-
-body.dark #typingStatus {
-  color: #b8b4b4;
-}
-#onlineUsers {
-  font-size: 13px;
-  margin-bottom: 6px;
-  color: green;
-}
-
+.dark #chatApp { background: #1f2933; }
+.dark .other { background: #374151; color: white; }
+.dark input { background: #111; color: white; }

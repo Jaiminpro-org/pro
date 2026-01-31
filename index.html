@@ -7,34 +7,31 @@
 </head>
 <body>
 
-<div class="app">
-  <h2>💬 PRO Messenger</h2>
-<button id="loginBtn">🔐 Login with Google</button>
-<button id="logoutBtn" style="display:none;">🚪 Logout</button>
+<div id="authScreen" class="center">
+  <h1>PRO Messenger</h1>
+  <button id="googleLogin">Sign in with Google</button>
+</div>
 
-  <div id="usernameBox"></div>
-  <div id="onlineUsers">🟢 Online: 0</div>
-  <div id="typingStatus"></div>
+<div id="chatApp" class="hidden">
+  <header>
+    <h2 id="chatTitle">Public Chat</h2>
+    <button id="themeBtn">🌙</button>
+  </header>
+
+  <div id="onlineUsers"></div>
 
   <div id="chat"></div>
+  <div id="typingStatus"></div>
 
-  <div class="input-row">
-    <button id="emojiBtn">😊</button>
-    <input id="messageInput" placeholder="Type a message…" />
+  <div class="inputBox">
+    <input id="messageInput" placeholder="Type a message..." />
+    <button id="emojiBtn">😀</button>
+    <button id="sendBtn">Send</button>
   </div>
-  <div id="privateHeader" style="display:none">
-  <h3 id="privateWith"></h3>
-  <button id="backToPublic">⬅ Back</button>
+
+  <button id="backBtn" class="hidden">⬅ Back to Public</button>
 </div>
 
-
-  <button id="sendBtn">Send</button>
-  <button id="clearBtn">Clear Chat</button>
-  <button id="changeNameBtn">Change Name</button>
-  <button id="themeBtn">🌙 Dark</button>
-</div>
-
-<script type="module" src="firebase.js"></script>
 <script type="module" src="script.js"></script>
 </body>
 </html>

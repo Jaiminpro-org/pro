@@ -1,10 +1,11 @@
-import { auth, provider } from "./firebase.js";
+import { app } from "./firebase.js";
 import {
+  getAuth,
+  GoogleAuthProvider,
   signInWithPopup,
-  signOut,
   onAuthStateChanged
 } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-auth.js";
-import { app } from "./firebase.js";
+
 import {
   getDatabase,
   ref,
@@ -12,201 +13,123 @@ import {
   onChildAdded,
   set,
   onValue,
-  onDisconnect,
-  remove
+  onDisconnect
 } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-database.js";
-let currentChatType = "public"; // public | private
-let currentPrivateChatId = null;
-let currentPrivateUser = null;
 
-/* ---------- BASIC SETUP ---------- */
+const auth = getAuth(app);
 const db = getDatabase(app);
-const messagesRef = ref(db, "messages");
-const typingRef = ref(db, "typing");
-const onlineUsersRef = ref(db, "onlineUsers");
+const provider = new GoogleAuthProvider();
 
-/* ---------- ELEMENTS ---------- */
+const authScreen = document.getElementById("authScreen");
+const chatApp = document.getElementById("chatApp");
 const chat = document.getElementById("chat");
 const input = document.getElementById("messageInput");
 const sendBtn = document.getElementById("sendBtn");
-const clearBtn = document.getElementById("clearBtn");
-const changeNameBtn = document.getElementById("changeNameBtn");
 const emojiBtn = document.getElementById("emojiBtn");
-const typingStatus = document.getElementById("typingStatus");
 const onlineUsersDiv = document.getElementById("onlineUsers");
+const typingStatus = document.getElementById("typingStatus");
 const themeBtn = document.getElementById("themeBtn");
+const backBtn = document.getElementById("backBtn");
+const chatTitle = document.getElementById("chatTitle");
 
-const sendSound = new Audio("send.mp3");
-sendSound.volume = 0.6;
+let currentUser;
+let mode = "public";
+let privateChatId = null;
 
-/* ---------- USERNAME ---------- */
-let username = localStorage.getItem("username");
+const emojis = ["😀","😂","😍","🔥","😎","❤️"];
 
-if (!username) {
-  username = prompt("Enter your name");
-  localStorage.setItem("username", username);
+document.getElementById("googleLogin").onclick = () => {
+  signInWithPopup(auth, provider);
+};
+
+onAuthStateChanged(auth, user => {
+  if (!user) return;
+  currentUser = user;
+  authScreen.classList.add("hidden");
+  chatApp.classList.remove("hidden");
+
+  const userRef = ref(db, "onlineUsers/" + user.uid);
+  set(userRef, user.displayName);
+  onDisconnect(userRef).remove();
+
+  loadPublicChat();
+  loadOnlineUsers();
+});
+
+function loadPublicChat() {
+  chat.innerHTML = "";
+  mode = "public";
+  chatTitle.innerText = "Public Chat";
+  backBtn.classList.add("hidden");
+
+  const messagesRef = ref(db, "messages");
+  onChildAdded(messagesRef, snap => render(snap.val()));
 }
 
-const myOnlineRef = ref(db, "onlineUsers/" + username);
-set(myOnlineRef, true);
-onDisconnect(myOnlineRef).remove();
-const loginBtn = document.getElementById("loginBtn");
-const logoutBtn = document.getElementById("logoutBtn");
+function openPrivate(uid, name) {
+  chat.innerHTML = "";
+  mode = "private";
+  backBtn.classList.remove("hidden");
+  chatTitle.innerText = "Chat with " + name;
 
-loginBtn.onclick = async () => {
-  try {
-    await signInWithPopup(auth, provider);
-  } catch (err) {
-    alert(err.message);
-  }
-};
+  privateChatId =
+    currentUser.uid < uid
+      ? currentUser.uid + "_" + uid
+      : uid + "_" + currentUser.uid;
 
-logoutBtn.onclick = async () => {
-  await signOut(auth);
-};
+  const privateRef = ref(db, "privateChats/" + privateChatId);
+  onChildAdded(privateRef, snap => render(snap.val()));
+}
 
+function render(data) {
+  const div = document.createElement("div");
+  div.className =
+    "message " + (data.uid === currentUser.uid ? "me" : "other");
+  div.innerHTML = `<div class="username">${data.name}</div>${data.text}`;
+  chat.appendChild(div);
+  chat.scrollTop = chat.scrollHeight;
+}
 
-/* ---------- SEND MESSAGE ---------- */
+sendBtn.onclick = sendMessage;
+input.onkeydown = e => e.key === "Enter" && sendMessage();
+
 function sendMessage() {
   const text = input.value.trim();
   if (!text) return;
 
-  if (currentChatType === "public") {
-    push(messagesRef, {
-      name: username,
-      uid: auth.currentUser.uid,
-      text,
-      time: Date.now()
-    });
-  } else {
-    const privateRef = ref(
-      db,
-      `privateChats/${currentPrivateChatId}/messages`
-    );
+  const data = {
+    name: currentUser.displayName,
+    uid: currentUser.uid,
+    text,
+    time: Date.now()
+  };
 
-    push(privateRef, {
-      name: username,
-      uid: auth.currentUser.uid,
-      text,
-      time: Date.now()
-    });
+  if (mode === "public") {
+    push(ref(db, "messages"), data);
+  } else {
+    push(ref(db, "privateChats/" + privateChatId), data);
   }
 
   input.value = "";
 }
 
-
-sendBtn.onclick = sendMessage;
-input.addEventListener("keydown", e => {
-  if (e.key === "Enter") sendMessage();
-});
-
-/* ---------- TYPING STATUS ---------- */
-let typingTimer;
-input.addEventListener("input", () => {
-  set(typingRef, username);
-  clearTimeout(typingTimer);
-  typingTimer = setTimeout(() => set(typingRef, ""), 1500);
-});
-
-/* ---------- EMOJI ---------- */
-const emojis = ["😀","😂","😍","😎","🔥","💙","👍","🥲","😜","❤️"];
 emojiBtn.onclick = () => {
-  input.value += emojis[Math.floor(Math.random() * emojis.length)];
-  input.focus();
+  input.value += emojis[Math.floor(Math.random()*emojis.length)];
 };
 
-/* ---------- CHAT LISTENER ---------- */
-onChildAdded(messagesRef, snap => {
-  const data = snap.val();
-
-  const msg = document.createElement("div");
-  msg.className = "message " + (data.name === username ? "me" : "other");
-
-  msg.innerHTML = `
-    <div class="username">${data.name}</div>
-    <div>${data.text}</div>
-    <div class="time">${new Date(data.time).toLocaleTimeString([], {
-      hour: "2-digit",
-      minute: "2-digit"
-    })}</div>
-  `;
-
-  chat.appendChild(msg);
-  chat.scrollTop = chat.scrollHeight;
-});
-
-/* ---------- TYPING LISTENER ---------- */
-onValue(typingRef, snap => {
-  const name = snap.val();
-  typingStatus.innerText =
-    name && name !== username ? `${name} is typing...` : "";
-});
-
-/* ---------- ONLINE USERS ---------- */
-function openPrivateChat(otherUid) {
-  currentChatType = "private";
-  currentPrivateUser = otherUid;
-
-  const myUid = auth.currentUser.uid;
-  currentPrivateChatId =
-    myUid < otherUid ? `${myUid}_${otherUid}` : `${otherUid}_${myUid}`;
-
-  chat.innerHTML = "";
-
-  document.getElementById("privateHeader").style.display = "block";
-  document.getElementById("privateWith").innerText =
-    "Private chat with " + otherUid;
-
-  const privateRef = ref(
-    db,
-    `privateChats/${currentPrivateChatId}/messages`
-  );
-
-  onChildAdded(privateRef, (snapshot) => {
-    renderMessage(snapshot.val());
+function loadOnlineUsers() {
+  onValue(ref(db, "onlineUsers"), snap => {
+    onlineUsersDiv.innerHTML = "🟢 Online Users";
+    Object.entries(snap.val() || {}).forEach(([uid,name]) => {
+      if (uid === currentUser.uid) return;
+      const b = document.createElement("button");
+      b.innerText = name;
+      b.onclick = () => openPrivate(uid,name);
+      onlineUsersDiv.appendChild(b);
+    });
   });
 }
 
+backBtn.onclick = loadPublicChat;
 
-/* ---------- UI ACTIONS ---------- */
-clearBtn.onclick = () => chat.innerHTML = "";
-
-changeNameBtn.onclick = () => {
-  localStorage.removeItem("username");
-  location.reload();
-};
-
-/* ---------- DARK MODE ---------- */
-const savedTheme = localStorage.getItem("theme");
-if (savedTheme === "dark") {
-  document.body.classList.add("dark");
-  themeBtn.innerText = "☀️ Light";
-}
-
-themeBtn.onclick = () => {
-  document.body.classList.toggle("dark");
-  const dark = document.body.classList.contains("dark");
-  themeBtn.innerText = dark ? "☀️ Light" : "🌙 Dark";
-  localStorage.setItem("theme", dark ? "dark" : "light");
-};
-onAuthStateChanged(auth, user => {
-  if (user) {
-    username = user.displayName;
-    localStorage.setItem("username", username);
-
-    loginBtn.style.display = "none";
-    logoutBtn.style.display = "block";
-
-    const myOnlineRef = ref(db, "onlineUsers/" + username);
-    set(myOnlineRef, true);
-    onDisconnect(myOnlineRef).remove();
-  } else {
-    loginBtn.style.display = "block";
-    logoutBtn.style.display = "none";
-    chat.innerHTML = "";
-  }
-});
-document.getElementById("backToPublic").onclick = () => {
-  location.reload();
-};
+themeBtn.onclick = () => document.body.classList.toggle("dark");
