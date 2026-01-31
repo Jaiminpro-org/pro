@@ -1,35 +1,35 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <title>PRO Messenger</title>
-  <link rel="stylesheet" href="style.css" />
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PRO Messenger</title>
+<link rel="stylesheet" href="style.css">
 </head>
+
 <body>
 
-<div id="authScreen" class="center">
-  <h1>PRO Messenger</h1>
+<!-- LOGIN -->
+<div id="login" class="center">
+  <h2>PRO Messenger</h2>
   <button id="googleLogin">Sign in with Google</button>
 </div>
 
-<div id="chatApp" class="hidden">
+<!-- CHAT APP -->
+<div id="app" class="hidden">
+
   <header>
-    <h2 id="chatTitle">Public Chat</h2>
-    <button id="themeBtn">🌙</button>
+    <span id="userName"></span>
+    <span id="onlineCount"></span>
   </header>
 
-  <div id="onlineUsers"></div>
-
   <div id="chat"></div>
-  <div id="typingStatus"></div>
 
-  <div class="inputBox">
-    <input id="messageInput" placeholder="Type a message..." />
-    <button id="emojiBtn">😀</button>
+  <div class="inputBar">
+    <input id="messageInput" placeholder="Message…" />
     <button id="sendBtn">Send</button>
   </div>
 
-  <button id="backBtn" class="hidden">⬅ Back to Public</button>
 </div>
 
 <script type="module" src="script.js"></script>
